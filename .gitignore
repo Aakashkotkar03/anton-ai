@@ -1,0 +1,68 @@
+# === Anton AI .gitignore ===
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+release/
+
+# Environment & secrets — NEVER commit these
+.env
+.env.*
+.env.local
+.env.production
+SECRETS.md
+
+# Firebase service account keys — NEVER commit
+*-firebase-adminsdk-*.json
+serviceAccountKey*.json
+*.json.key
+
+# AI model files — too large for git
+*.gguf
+*.bin
+*.safetensors
+
+# Inference engine binaries (bundled at build time, not in git)
+engines/llama/binaries/
+engines/whisper/binaries/
+engines/whisper/models/
+engines/sd/binaries/
+
+# Electron / electron-builder
+*.blockmap
+*.exe
+*.msi
+*.appx
+*.msix
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude MCP artifacts
+skills-lock.json
+.agents/
+
+# Test output
+coverage/
+test-results/
+playwright-report/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temp files
+*.part
+*.tmp

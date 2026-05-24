@@ -1,0 +1,113 @@
+# electron-builder.yml — Anton AI build configuration
+# Builds Windows NSIS installer + MSIX package
+
+appId: com.localintelligence.antonai
+productName: Anton AI
+copyright: Copyright © 2026 Local Intelligence
+
+# Renderer build output from Vite
+directories:
+  output: release
+  buildResources: build
+
+# Files to include in the packaged app
+files:
+  - dist/**/*
+  - electron/**/*
+  - engines/**/*
+  - catalogue/**/*
+  - "!**/*.map"
+  - "!**/node_modules/.cache/**"
+
+# Extra resources copied alongside the app (not inside asar)
+extraResources:
+  - from: engines/
+    to: engines/
+    filter:
+      - "**/*"
+  - from: catalogue/
+    to: catalogue/
+    filter:
+      - "**/*"
+  - from: build/native/
+    to: native/
+    filter:
+      - "**/*.dll"
+
+# Asar archive — exclude large binaries
+asar: true
+asarUnpack:
+  - "engines/**/*"
+
+# Protocol handler: antonai://
+protocols:
+  - name: Anton AI
+    schemes:
+      - antonai
+
+# === Windows targets ===
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: appx
+      arch:
+        - x64
+  icon: build/icon.ico
+  # Sign with certificate from environment (GitHub Actions secret)
+  # certificateFile and certificatePassword are set via CSC_LINK and CSC_KEY_PASSWORD env vars
+  publisherName: Local Intelligence
+
+# NSIS installer configuration
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  installerHeaderIcon: build/icon.ico
+  deleteAppDataOnUninstall: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Anton AI
+  # Custom NSIS script for shell extension DLL registration
+  include: build/nsis-shell-extension.nsh
+  # File associations
+  fileAssociations:
+    - ext: pdf
+      name: PDF Document
+      description: Open PDF with Anton AI
+      role: Viewer
+    - ext: docx
+      name: Word Document
+      description: Open DOCX with Anton AI
+      role: Viewer
+    - ext: txt
+      name: Text File
+      description: Open TXT with Anton AI
+      role: Viewer
+    - ext: md
+      name: Markdown File
+      description: Open MD with Anton AI
+      role: Viewer
+    - ext: csv
+      name: CSV File
+      description: Open CSV with Anton AI
+      role: Viewer
+
+# MSIX / AppX for Microsoft Store
+appx:
+  identityName: LocalIntelligence.AntonAI
+  applicationId: AntonAI
+  publisher: CN=LocalIntelligence
+  publisherDisplayName: Local Intelligence
+  languages:
+    - en-US
+
+# Publish — disabled for v1.0 (manual upload to Microsoft Store)
+publish: null
+
+# Do not pack native modules into asar
+npmRebuild: true
+nodeGypRebuild: false

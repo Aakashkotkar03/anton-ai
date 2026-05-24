@@ -1,0 +1,83 @@
+# .github/workflows/build-windows.yml
+# Builds Anton AI Windows installer on push to 'release' branch.
+# All secrets are stored in GitHub Environment "production" — never in code.
+
+name: Build Windows
+
+on:
+  push:
+    branches:
+      - release
+      - main    # temporary — remove after first successful build
+
+# 🔒 Minimal permissions — only what's needed
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Build renderer (Vite) — no secrets exposed to frontend build
+      - name: Build renderer
+        run: npm run build
+
+      # Build the Windows Shell Extension DLL (C++)
+      # continue-on-error: DLL is optional for first test build
+      - name: Build Shell Extension DLL
+        continue-on-error: true
+        shell: bash
+        run: |
+          cd native
+          cmake -B build -G "Visual Studio 17 2022" -A x64
+          cmake --build build --config Release
+          mkdir -p ../build/native
+          cp build/Release/AntonAIShell.dll ../build/native/AntonAIShell.dll
+
+      # 🔒 Code signing credentials from GitHub Secrets only
+      # CSC_LINK: base64-encoded .pfx certificate
+      # CSC_KEY_PASSWORD: certificate password
+      - name: Build Windows installer
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          # Firebase config for the built app (public keys only — safe to embed)
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+        run: npx electron-builder --win --config electron-builder.yml
+
+      # 🔒 Only upload artifacts — no auto-publish to store
+      - name: Upload NSIS installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: anton-ai-windows-nsis
+          path: release/*.exe
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload MSIX package
+        uses: actions/upload-artifact@v4
+        with:
+          name: anton-ai-windows-msix
+          path: release/*.appx
+          retention-days: 30
+          if-no-files-found: warn
