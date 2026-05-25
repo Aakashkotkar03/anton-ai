@@ -51,9 +51,6 @@ win:
     - target: nsis
       arch:
         - x64
-    - target: appx
-      arch:
-        - x64
   icon: build/icon.ico
   # Sign with certificate from environment (GitHub Actions secret)
   # certificateFile and certificatePassword are set via CSC_LINK and CSC_KEY_PASSWORD env vars
