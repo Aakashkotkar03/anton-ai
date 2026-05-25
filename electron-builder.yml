@@ -74,27 +74,28 @@ nsis:
   # Custom NSIS script for shell extension DLL registration
   include: build/nsis-shell-extension.nsh
   # File associations
-  fileAssociations:
-    - ext: pdf
-      name: PDF Document
-      description: Open PDF with Anton AI
-      role: Viewer
-    - ext: docx
-      name: Word Document
-      description: Open DOCX with Anton AI
-      role: Viewer
-    - ext: txt
-      name: Text File
-      description: Open TXT with Anton AI
-      role: Viewer
-    - ext: md
-      name: Markdown File
-      description: Open MD with Anton AI
-      role: Viewer
-    - ext: csv
-      name: CSV File
-      description: Open CSV with Anton AI
-      role: Viewer
+  
+fileAssociations:
+  - ext: pdf
+    name: PDF Document
+    description: Open PDF with Anton AI
+    role: Viewer
+  - ext: docx
+    name: Word Document
+    description: Open DOCX with Anton AI
+    role: Viewer
+  - ext: txt
+    name: Text File
+    description: Open TXT with Anton AI
+    role: Viewer
+  - ext: md
+    name: Markdown File
+    description: Open MD with Anton AI
+    role: Viewer
+  - ext: csv
+    name: CSV File
+    description: Open CSV with Anton AI
+    role: Viewer
 
 # MSIX / AppX for Microsoft Store
 appx:
